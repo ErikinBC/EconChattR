@@ -1,0 +1,6 @@
+Due to the .gitignore, the .txt and .jsonl files will not appear in this repo and can be created by running the pipeline.sh script. After running the script you should expect to see the following files where model={ada,babbage,curie,davinci}:
+
+raw_transcripts.txt
+prompt_completion.jsonl
+training_data_all.json
+training_data_{model}.json
