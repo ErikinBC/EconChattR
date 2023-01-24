@@ -29,8 +29,8 @@ python3 3_prepare_training.py --n_epochs $n_epochs --max_cost $max_cost
 
 # Use the OpenAI tools to train the model
 echo "--- (4) Creating fine-tuned model with openai  --- "
-source 4_tune_models.py --n_epochs $n_epochs
-#   output: ...
+python3 4_tune_models.py --n_epochs $n_epochs
+#   output: see https://beta.openai.com/ (FINE-TUNED MODELS)
 
 # Comparing trained model results to existing
 echo "--- (5) Run prompt_baseline  --- "
