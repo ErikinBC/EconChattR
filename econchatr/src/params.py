@@ -2,9 +2,16 @@
 Stores the openai parameters
 """
 
+# Data file name
+path_dialogue = 'data/russ_guest.csv'
+
 # Define the name of variable name of the openAI key and group
 openai_key_name = 'OPENAI_PLAYGROUND_KEY'
 opeani_org_name = 'OPENAI_PLAYGROUND_ORG'
+
+# Set the model we will use
+model_choice = 'gpt-4'
+token_limit = 8192
 
 # Set up the baseline parameter dictionary (model and prompt will need to swapped in)
 di_completion_params = {

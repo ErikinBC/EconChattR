@@ -2,17 +2,24 @@
 Script to process the transcript output from scrape.R
 """
 
+# External modules
 import os
 import re
 import numpy as np
 import pandas as pd
+# Internal modules
+from econchatr.src.params import path_dialogue
+
 
 ###########################
 # ---- (1) LOAD DATA ---- #
 
 # Load raw_transcripts.txt line by line
-with open(os.path.join('data','raw_transcripts.txt'), 'r') as f:
+path_transcripts = os.path.join('data','raw_transcripts.txt')
+assert os.path.exists(path_transcripts), 'could not find raw_transcripts in the data folder'
+with open(path_transcripts, 'r') as f:
     lines = pd.Series(f.readlines())
+print(f'Found a total of {len(lines)} raw transcript lines')
 
 # Find lines that start with "TimePodcast Episode"
 start_lines = np.where(lines.str.contains('TimePodcast Episode'))[0]
@@ -29,7 +36,9 @@ for i in range(n_start_lines):
 # Convert to series
 transcripts = pd.Series(transcripts)
 # Throw error if transcripts does not start with "TimePodcast Episode"
-assert transcripts.str.contains('TimePodcast Episode').all()
+assert transcripts.str.contains('TimePodcast Episode').all(), 'Expected to find TimePodcast at the start of all podcasts'
+print(f'Found {len(transcripts)} episodes with time stamps')
+
 
 ############################
 # ---- (2) CLEAN DATA ---- #
@@ -39,7 +48,7 @@ episodes = transcripts[transcripts.str.contains('Recording date')].reset_index(d
 # Split on the first mention of recording date
 rec_date = episodes.str.split(pat='Recording date',n=1,expand=True)[1]
 # Remove the first instance of a colon and any whitespace that follows
-rec_date = rec_date.str.replace('^\\:\\s','')
+rec_date = rec_date.str.replace('^\\:\\s','',regex=True)
 # Keep only letters, numbers, and whitespace
 rec_date = rec_date.str.replace('[^\\w\\s]',' ',regex=True)
 # Replace multiple spaces with a single space
@@ -77,7 +86,8 @@ rec_dyear = rec_dyear.astype(str)
 rec_dtime = pd.to_datetime(rec_month + ' ' + rec_dyear['day'] + ' ' + rec_dyear['year'],format='%B %d %Y')
 
 # Check that rec_dtime is the same length as episodes
-assert len(rec_dtime) == len(episodes)
+assert len(rec_dtime) == len(episodes), 'date length should make epsidoe length'
+print(f'Found a total of {len(episodes)} episodes with recording dates')
 
 
 #####################################
@@ -157,10 +167,7 @@ for i, s in enumerate(russ_episodes):
 # Combine the holder
 clean_speakers = pd.concat(holder)[['episode','segment','speaker','txt']]
 clean_speakers = clean_speakers.sort_values(['episode','segment']).reset_index(drop=True)
-clean_speakers.drop(columns='txt').head(10)
-
-
-clean_speakers.drop(columns='txt').groupby('episode').head(1).sort_values('speaker').speaker.value_counts()
+print(f"There are a total of {clean_speakers['episode'].nunique()} episodes with Russ/Guest")
 
 
 ####################################
@@ -195,15 +202,18 @@ for i, df in clean_speakers.groupby('episode'):
 # Combine the holder
 df_russ_guest = pd.concat(holder).drop(columns=['final_codes','speaker']).reset_index(drop=True)
 df_russ_guest['txt'] = df_russ_guest['txt'].str.replace('([0-9]{1}\\:)?[0-9]{1,2}\\:[0-9]{1,2}','',regex=True)
+path_dialogue = os.path.join('data', 'russ_guest.csv')
+df_russ_guest.to_csv(path_dialogue, index=False)
 
-# Grouping by each episode, the "prompt" is the previous row of txt, and the "completion" is the current row of txt
-df_russ_guest['prompt'] = df_russ_guest.groupby('episode')['txt'].shift(1).fillna('')
-df_russ_guest['completion'] = df_russ_guest['txt']
-prompt_completion = df_russ_guest.drop(columns='txt').query('final_speaker=="Russ"')
-# Groupby episode and replace segment with cumcount
-prompt_completion['segment'] = prompt_completion.groupby('episode')['segment'].cumcount()+1
+# # Grouping by each episode, the "prompt" is the previous row of txt, and the "completion" is the current row of txt
+# df_russ_guest['prompt'] = df_russ_guest.groupby('episode')['txt'].shift(1).fillna('')
+# df_russ_guest['completion'] = df_russ_guest['txt']
+# prompt_completion = df_russ_guest.drop(columns='txt').query('final_speaker=="Russ"')
+# # Groupby episode and replace segment with cumcount
+# prompt_completion['segment'] = prompt_completion.groupby('episode')['segment'].cumcount()+1
+# prompt_completion.reset_index(drop=True, inplace=True)
 
-# Save prompt_completion as JSONL file for the prompt and completion columns
-prompt_completion[['prompt','completion']].to_json(os.path.join('data','prompt_completion.jsonl'),orient='records',lines=True)
+# # Save prompt_completion as JSONL file for the prompt and completion columns
+# prompt_completion[['prompt','completion']].to_json(os.path.join('data','prompt_completion.jsonl'),orient='records',lines=True)
 
 print('~~~ End of 2_process_transcripts.py ~~~')

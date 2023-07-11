@@ -5,24 +5,40 @@ Utility scripts
 # External modules
 import os
 import openai
+import tiktoken
 import pandas as pd
 from time import sleep
 from cleantext import clean
 from datetime import datetime
 # Internal params
 from econchatr.src.params import openai_key_name, opeani_org_name
+enc = tiktoken.get_encoding("cl100k_base")
+
 
 def set_openai_keys() -> None:
     openai.api_key = os.getenv(openai_key_name)
-    openai.organization = os.getenv(opeani_org_name)
+    #openai.organization = os.getenv(opeani_org_name)
 
 
-def n_tokens(x:str) -> int:
+def find_gpt_models(model_choice:str or None) -> list or None:
+    """
+    Checks to see if model_choice is a valid model, or just returns the list of gpt models if left as None
+    """
+    valid_models = pd.Series([m['id'] for m in openai.Engine.list()['data']])
+    idx_gpt = valid_models.str.contains('gpt')
+    gpt_models = "\n".join(valid_models[idx_gpt])
+    print(f'Found the following {idx_gpt.sum()} GPT models:\n{gpt_models}')
+    gpt_list = valid_models[idx_gpt].to_list()
+    if model_choice is None:
+        return gpt_list
+    else:
+        assert model_choice in gpt_list, f'Could not find {model_choice} in the GPT model list'
+
+
+def n_tokens(txt:str) -> int:
     """Count the number of tokens in a string"""
-    from transformers import GPT2TokenizerFast
-    tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
-    assert isinstance(x, str), 'Input must be a string'
-    return len(tokenizer.encode(x))
+    return len(enc.encode(txt))
+
 
 def clean_text(txt:str) -> str:
     """Function to clean text"""
