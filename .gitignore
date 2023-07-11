@@ -3,3 +3,4 @@
 *.jsonl
 *.png
 !output/*.png
+*.xml

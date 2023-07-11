@@ -2,6 +2,10 @@
 Stores the openai parameters
 """
 
+# Define the name of variable name of the openAI key and group
+openai_key_name = 'OPENAI_PLAYGROUND_KEY'
+opeani_org_name = 'OPENAI_PLAYGROUND_ORG'
+
 # Set up the baseline parameter dictionary (model and prompt will need to swapped in)
 di_completion_params = {
   "max_tokens": 250,

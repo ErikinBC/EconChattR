@@ -20,6 +20,7 @@ dir.create('data', showWarnings=FALSE)
 # (i) Download XML containing all files
 xml_link = 'http://www.econlib.org/library/EconTalk.xml'
 xml_file = get_last_split(xml_link, '/')
+xml_file = file.path('data', xml_file)
 # https://feeds.simplecast.com/wgl4xEgL
 download.file(url=xml_link, xml_file)
 
@@ -74,9 +75,11 @@ for (i in seq(n_links)) {  #n_links
     seconds_i = runif(1, 1, 3)
     Sys.sleep(seconds_i)
 }
+transcripts = unlist(transcripts)
 
 # (iv) Save transcripts for later processing
-writeLines(unlist(transcripts), con=file.path('data','raw_transcripts.txt'))
+path_transcripts = file.path('data','raw_transcripts.txt')
+writeLines(transcripts, con=path_transcripts)
 
 
 print('~~~ End of 1_scrape.R ~~~')

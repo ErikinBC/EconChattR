@@ -2,23 +2,25 @@
 Utility scripts
 """
 
+# External modules
 import os
 import openai
 import pandas as pd
 from time import sleep
-from datetime import datetime
-local_tzname = datetime.now().astimezone().tzname()
 from cleantext import clean
-from transformers import GPT2TokenizerFast
-tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
+from datetime import datetime
+# Internal params
+from econchatr.src.params import openai_key_name, opeani_org_name
 
 def set_openai_keys() -> None:
-    openai.api_key = os.getenv("OPENAI_API_KEY")
-    openai.organization = os.getenv("OPENAI_ORG_ID")
+    openai.api_key = os.getenv(openai_key_name)
+    openai.organization = os.getenv(opeani_org_name)
 
 
 def n_tokens(x:str) -> int:
     """Count the number of tokens in a string"""
+    from transformers import GPT2TokenizerFast
+    tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
     assert isinstance(x, str), 'Input must be a string'
     return len(tokenizer.encode(x))
 
@@ -80,6 +82,7 @@ def process_openai_messages(openai_id:str) -> pd.DataFrame:
     """
     Process the messages from OpenAI
     """
+    local_tzname = datetime.now().astimezone().tzname()
     data = openai.FineTune.list_events(openai_id)['data']
     messages = pd.Series([x['message'] for x in data])
     date = pd.Series([x['created_at'] for x in data])
