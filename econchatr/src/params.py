@@ -10,8 +10,7 @@ openai_key_name = 'OPENAI_PLAYGROUND_KEY'
 opeani_org_name = 'OPENAI_PLAYGROUND_ORG'
 
 # Set the model we will use
-model_choice = 'gpt-4'
-token_limit = 8192
+model_choice_dict = {'gpt-4':8192, 'gpt-3.5-turbo-16k':16000}
 
 # Set up the baseline parameter dictionary (model and prompt will need to swapped in)
 di_completion_params = {
