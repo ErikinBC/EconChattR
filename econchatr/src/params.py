@@ -3,7 +3,14 @@ Stores the openai parameters
 """
 
 # Data file name
-path_dialogue = 'data/russ_guest.csv'
+path_data = 'data'
+path_dialogue = f'{path_data}/russ_guest.csv'
+path_smith_quotes = f'{path_data}/smith_quotes.csv'
+
+# Define the maximum number of tokens the embedding model can handle
+embedding_model_name = 'text-embedding-ada-002'
+embedding_dim_max = 8191
+
 
 # Define the name of variable name of the openAI key and group
 openai_key_name = 'OPENAI_PLAYGROUND_KEY'
